@@ -44,22 +44,21 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/weatherapp';
 
-// Graceful Database Connection Bootstrapper
+// Graceful Database Connection Bootstrapper (Asynchronous)
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Successfully connected to MongoDB.');
-    app.listen(PORT, () => {
-      console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
   })
   .catch((err) => {
     console.error('CRITICAL: MongoDB connection failed!', err.message);
-    console.warn('Bootstrapping server in OFFLINE/MOCKED mode to prevent complete system crash...');
-    
-    // Listen even if MongoDB fails (offline/degraded operation support)
-    app.listen(PORT, () => {
-      console.log(`Degraded Server running on port ${PORT} (without active MongoDB connection)`);
-    });
+    console.warn('Running server in DEGRADED/OFFLINE mode to prevent complete system crash...');
   });
+
+// ONLY listen if running locally (not in serverless production on Vercel)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running in development mode on port ${PORT}`);
+  });
+}
 
 module.exports = app;
