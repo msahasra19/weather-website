@@ -64,7 +64,10 @@ export default function Dashboard() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch weather');
+      const errorMsg = err.response?.data?.message || 
+                       (typeof err.response?.data?.error === 'string' ? err.response?.data?.error : null) || 
+                       'Failed to fetch weather';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

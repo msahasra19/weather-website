@@ -3,8 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-// Configure axios base defaults
-axios.defaults.baseURL = 'http://localhost:5000';
+// Configure axios base defaults using environment variables if set
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -56,9 +56,20 @@ export function AuthProvider({ children }) {
         return { success: true };
       }
     } catch (err) {
+      // Helper to extract a friendly error message from backend or network failures
+      let errorMsg = 'Registration failed. Please try again.';
+      if (err.response) {
+        // Server responded with a status outside 2xx
+        errorMsg = err.response.data?.message || 
+                   (typeof err.response.data?.error === 'string' ? err.response.data.error : null) || 
+                   errorMsg;
+      } else if (err.request) {
+        // The request was made but no response was received
+        errorMsg = 'Cannot connect to backend server. Please verify the backend is running on port 5000.';
+      }
       return {
         success: false,
-        error: err.response?.data?.error || 'Registration failed. Please try again.'
+        error: errorMsg
       };
     }
   };
@@ -73,9 +84,17 @@ export function AuthProvider({ children }) {
         return { success: true };
       }
     } catch (err) {
+      let errorMsg = 'Invalid credentials. Please try again.';
+      if (err.response) {
+        errorMsg = err.response.data?.message || 
+                   (typeof err.response.data?.error === 'string' ? err.response.data.error : null) || 
+                   errorMsg;
+      } else if (err.request) {
+        errorMsg = 'Cannot connect to backend server. Please verify the backend is running on port 5000.';
+      }
       return {
         success: false,
-        error: err.response?.data?.error || 'Invalid credentials. Please try again.'
+        error: errorMsg
       };
     }
   };
