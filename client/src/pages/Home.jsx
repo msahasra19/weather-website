@@ -8,7 +8,7 @@ import YouTubePanel from '../components/YouTubePanel';
 import ErrorBanner from '../components/ErrorBanner';
 import { Loader2, CloudAlert, RefreshCw, Sparkles } from 'lucide-react';
 
-const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 const fetcher = async (url) => {
   const res = await axios.get(url);
@@ -201,7 +201,7 @@ export default function Home() {
                       AI Weather Narrator
                     </h4>
                   </div>
-                  <p className="text-sm font-semibold text-slate-200 leading-relaxed italic relative z-10 dark:text-slate-200 light:text-slate-700">
+                  <p className="text-sm font-semibold text-slate-700 leading-relaxed italic relative z-10 dark:text-slate-200">
                     "{renderWeather.aiNarrative}"
                   </p>
                 </div>

@@ -2,13 +2,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
-  @apply bg-slate-900 text-white antialiased;
+  @apply bg-slate-50 text-slate-800 antialiased transition-colors duration-300;
   font-family: 'Inter', sans-serif;
 }
 
+.dark body {
+  @apply bg-slate-950 text-slate-100;
+}
+
 .glass-panel {
-  @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl rounded-2xl;
+  @apply bg-white/60 dark:bg-white/10 backdrop-blur-lg border border-slate-200 dark:border-white/20 shadow-xl rounded-2xl transition-all duration-300;
 }
 
 /* Custom Scrollbar */

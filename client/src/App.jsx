@@ -45,10 +45,10 @@ function AppContent() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col transition-colors duration-300 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100 light:from-slate-50 light:via-slate-100 light:to-slate-200 light:text-slate-800">
+      <div className="min-h-screen flex flex-col transition-colors duration-300 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 text-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100">
         
         {/* Navigation Bar */}
-        <nav className="glass-panel mx-4 mt-4 px-6 py-4 flex items-center justify-between z-50 sticky top-4 rounded-3xl dark:glass-panel light:glass-panel-light">
+        <nav className="glass-panel mx-4 mt-4 px-6 py-4 flex items-center justify-between z-50 sticky top-4 rounded-3xl">
           
           {/* Logo brand */}
           <Link to="/" className="flex items-center space-x-2.5 hover:opacity-90 transition shrink-0">
@@ -62,12 +62,12 @@ function AppContent() {
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="flex items-center space-x-1.5 hover:text-blue-400 transition text-sm font-semibold tracking-wide py-1 text-slate-300 dark:text-slate-300 light:text-slate-600 light:hover:text-blue-600">
+            <Link to="/" className="flex items-center space-x-1.5 transition text-sm font-semibold tracking-wide py-1 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400">
               <LayoutDashboard className="w-4 h-4" />
               <span>Dashboard</span>
             </Link>
             
-            <Link to="/history" className="flex items-center space-x-1.5 hover:text-teal-400 transition text-sm font-semibold tracking-wide py-1 text-slate-300 dark:text-slate-300 light:text-slate-600 light:hover:text-teal-600">
+            <Link to="/history" className="flex items-center space-x-1.5 transition text-sm font-semibold tracking-wide py-1 text-slate-600 hover:text-teal-600 dark:text-slate-300 dark:hover:text-teal-400">
               <HistoryIcon className="w-4 h-4" />
               <span>Search History</span>
             </Link>
@@ -75,7 +75,7 @@ function AppContent() {
             {/* Dark Mode Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-2 bg-slate-900/60 text-slate-300 border border-slate-800/80 rounded-2xl hover:text-teal-400 transition cursor-pointer hover-scale dark:bg-slate-900/60 dark:border-slate-800/80 light:bg-slate-200 light:border-slate-300 light:text-slate-600 light:hover:text-amber-500"
+              className="p-2 bg-slate-200 text-slate-600 border border-slate-300 rounded-2xl hover:text-amber-500 hover:bg-slate-300 transition cursor-pointer hover-scale dark:bg-slate-900/60 dark:border-slate-800/80 dark:text-slate-300 dark:hover:text-teal-400 dark:hover:bg-slate-900"
               aria-label="Toggle theme mode"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -83,8 +83,8 @@ function AppContent() {
 
             {/* Authentication Profiles */}
             {user ? (
-              <div className="flex items-center space-x-4 border-l border-slate-800 pl-6 dark:border-slate-800 light:border-slate-300">
-                <div className="flex items-center space-x-2 text-slate-300 py-1 light:text-slate-700">
+              <div className="flex items-center space-x-4 border-l border-slate-300 pl-6 dark:border-slate-800">
+                <div className="flex items-center space-x-2 text-slate-700 py-1 dark:text-slate-300">
                   <div className="bg-blue-500/20 p-1.5 rounded-full border border-blue-500/30">
                     <UserIcon className="w-3.5 h-3.5 text-blue-400" />
                   </div>
@@ -92,17 +92,17 @@ function AppContent() {
                 </div>
                 <button
                   onClick={logout}
-                  className="flex items-center space-x-1 bg-slate-800 hover:bg-slate-700/80 text-slate-200 hover:text-rose-400 border border-slate-700 rounded-xl px-3 py-1.5 text-xs transition font-bold cursor-pointer dark:bg-slate-800 light:bg-slate-200 light:text-slate-600 light:border-slate-300 light:hover:text-rose-500"
+                  className="flex items-center space-x-1 bg-slate-200 hover:bg-slate-300 text-slate-600 hover:text-rose-500 border border-slate-300 rounded-xl px-3 py-1.5 text-xs transition font-bold cursor-pointer dark:bg-slate-800 dark:hover:bg-slate-700/80 dark:text-slate-200 dark:hover:text-rose-400 dark:border-slate-700"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Logout</span>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3 border-l border-slate-800 pl-6 dark:border-slate-800 light:border-slate-300">
+              <div className="flex items-center space-x-3 border-l border-slate-300 pl-6 dark:border-slate-800">
                 <Link
                   to="/login"
-                  className="flex items-center space-x-1 text-slate-300 hover:text-white transition px-2 py-1 text-xs font-semibold dark:text-slate-300 light:text-slate-600 light:hover:text-slate-900"
+                  className="flex items-center space-x-1 text-slate-600 hover:text-slate-900 transition px-2 py-1 text-xs font-semibold dark:text-slate-300 dark:hover:text-white"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Login</span>
@@ -121,13 +121,13 @@ function AppContent() {
           <div className="flex md:hidden items-center gap-3 shrink-0">
             <button
               onClick={toggleTheme}
-              className="p-2 bg-slate-900/60 text-slate-300 border border-slate-800/80 rounded-2xl hover:text-teal-400 transition cursor-pointer dark:bg-slate-900/60 dark:border-slate-800/80 light:bg-slate-200 light:border-slate-300 light:text-slate-600"
+              className="p-2 bg-slate-200 text-slate-600 border border-slate-300 rounded-2xl hover:text-amber-500 transition cursor-pointer dark:bg-slate-900/60 dark:border-slate-800/80 dark:text-slate-300 dark:hover:text-teal-400"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 bg-slate-900/60 text-slate-300 border border-slate-800/80 rounded-2xl cursor-pointer hover:bg-slate-800 transition dark:bg-slate-900/60 light:bg-slate-200 light:border-slate-300 light:text-slate-600"
+              className="p-2 bg-slate-200 text-slate-600 border border-slate-300 rounded-2xl cursor-pointer hover:bg-slate-350 transition dark:bg-slate-900/60 dark:border-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -136,11 +136,11 @@ function AppContent() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden glass-panel mx-4 mt-2 p-5 rounded-3xl z-40 border border-slate-800/80 animate-in slide-in-from-top-4 duration-200 flex flex-col gap-4 dark:glass-panel light:glass-panel-light">
+          <div className="md:hidden glass-panel mx-4 mt-2 p-5 rounded-3xl z-40 border border-slate-200 dark:border-slate-800/80 animate-in slide-in-from-top-4 duration-200 flex flex-col gap-4">
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center space-x-2 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 font-semibold"
+              className="flex items-center space-x-2 py-2 text-slate-600 dark:text-slate-300 font-semibold"
             >
               <LayoutDashboard className="w-4 h-4 text-blue-400" />
               <span>Dashboard</span>
@@ -148,17 +148,17 @@ function AppContent() {
             <Link
               to="/history"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center space-x-2 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 font-semibold"
+              className="flex items-center space-x-2 py-2 text-slate-600 dark:text-slate-300 font-semibold"
             >
               <HistoryIcon className="w-4 h-4 text-teal-400" />
               <span>Search History</span>
             </Link>
 
             {/* Mobile Auth options */}
-            <div className="pt-4 border-t border-slate-800/80 dark:border-slate-800/80 light:border-slate-300/80">
+            <div className="pt-4 border-t border-slate-300 dark:border-slate-800/80">
               {user ? (
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2 py-1.5 text-slate-300 dark:text-slate-300 light:text-slate-700">
+                  <div className="flex items-center space-x-2 py-1.5 text-slate-700 dark:text-slate-300">
                     <UserIcon className="w-4 h-4 text-blue-400" />
                     <span className="text-sm font-semibold">Logged in as {user.name}</span>
                   </div>
@@ -214,7 +214,7 @@ function AppContent() {
         </main>
 
         {/* Footer Credit & PM Accelerator Branding */}
-        <footer className="glass-panel mx-4 mb-4 mt-auto p-6 md:p-8 border border-slate-800/80 rounded-3xl dark:glass-panel light:glass-panel-light">
+        <footer className="glass-panel mx-4 mb-4 mt-auto p-6 md:p-8 border border-slate-200 dark:border-slate-800/80 rounded-3xl">
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-8">
             
             {/* Developer Credit & Program Description */}
@@ -222,18 +222,18 @@ function AppContent() {
               <h4 className="text-sm font-extrabold tracking-widest text-teal-400 uppercase">
                 Developer Credit
               </h4>
-              <p className="text-lg font-black text-slate-100 dark:text-slate-100 light:text-slate-800 mt-1">
+              <p className="text-lg font-black text-slate-800 dark:text-slate-100 mt-1">
                 Miriyala Sahasra
               </p>
               
-              <div className="mt-4 pt-4 border-t border-slate-800/60">
-                <h5 className="text-[10px] font-bold text-slate-500 dark:text-slate-500 light:text-slate-500 uppercase tracking-widest">
+              <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-800/60">
+                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                   Academic / Assessment Affiliate
                 </h5>
-                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed mt-1.5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1.5">
                   The Product Manager Accelerator Program is designed to support PM professionals through every stage of their careers. From students looking for entry-level jobs to Directors looking to take on a leadership role, our program has helped over hundreds of students fulfill their career aspirations.
                 </p>
-                <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 leading-relaxed mt-2.5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-2.5">
                   Our Product Manager Accelerator community are ambitious and committed. Through our program they have learnt, honed and developed new PM and leadership skills, giving them a strong foundation for their future endeavors.
                 </p>
               </div>
@@ -250,7 +250,7 @@ function AppContent() {
                 <span>PM Accelerator LinkedIn</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </a>
-              <span className="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-500 font-medium text-left lg:text-right">
+              <span className="text-[10px] text-slate-500 font-medium text-left lg:text-right">
                 Full-Stack WeatherIQ © 2026
               </span>
             </div>

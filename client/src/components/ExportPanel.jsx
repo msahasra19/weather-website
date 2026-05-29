@@ -8,7 +8,7 @@ export default function ExportPanel({ onExportError }) {
   const triggerExport = async (format) => {
     setLoadingFormat(format);
     try {
-      const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '');
       const response = await axios({
         url: `${serverUrl}/api/export?format=${format}`,
         method: 'GET',
