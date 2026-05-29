@@ -1,0 +1,15 @@
+{
+  "name": "weather-app",
+  "version": "1.0.0",
+  "description": "Full Stack Weather App for Tech Assessment. Integrates OpenWeatherMap, Open-Meteo, Google Maps, and YouTube.",
+  "scripts": {
+    "install-all": "npm install && npm install --prefix server && npm install --prefix client",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
