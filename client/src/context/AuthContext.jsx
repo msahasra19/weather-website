@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-// Configure axios base defaults using environment variables if set
+// Configure axios base defaults using environment variables if set (triggering fresh build with updated Vercel environment variables)
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 export function AuthProvider({ children }) {
