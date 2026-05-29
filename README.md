@@ -2,7 +2,7 @@
 
 WeatherIQ AI is a production-quality, high-fidelity Full-Stack Weather Portal satisfying all requirements for both **Tech Assessment #1 (Frontend)** and **Tech Assessment #2 (Backend)**. 
 
-Designed with a premium dark-mode-first glassmorphic styling system (degrading gracefully to cohesive light themes), it handles live geocoded coordinate lookups, maps geolocated searches, pulls matching travel visual media, records search histories to MongoDB via CRUD routing, exports collections into multiple structures, and implements complete offline caching capability.
+Designed with a premium dark-mode-first glassmorphic styling system (degrading gracefully to cohesive light themes), it handles live geocoded coordinate lookups, maps geolocated searches, pulls matching travel visual media, records search histories to MongoDB via CRUD routing, exports collections into multiple structures, offers secure session logins, and implements complete offline caching capability.
 
 ---
 
@@ -11,6 +11,7 @@ Designed with a premium dark-mode-first glassmorphic styling system (degrading g
 - **Frontend**: React (Vite), Tailwind CSS (v4), Axios, SWR (React Cache & Fetching layer), Lucide React
 - **Backend**: Node.js + Express.js (REST API architecture)
 - **Database**: MongoDB with Mongoose ODM (TTL caching + relational querying)
+- **AI Integration**: Google Gemini API (`gemini-1.5-flash` system instruction model)
 - **Data Export Engines**: json2csv, fast-xml-parser, pdfkit, markdown-it
 - **Orchestration**: concurrently (concurrent development runner)
 
@@ -24,6 +25,7 @@ Designed with a premium dark-mode-first glassmorphic styling system (degrading g
   - **OpenWeatherMap API Key**: Free key from [OpenWeatherMap](https://openweathermap.org/) (for current conditions and 5-day forecast).
   - **Google Maps API Key**: Key with *Geocoding API* and *Maps Embed API* enabled from [Google Cloud Console](https://console.cloud.google.com/).
   - **YouTube Data API v3 Key**: Key with *YouTube Data API v3* enabled from [Google Cloud Console](https://console.cloud.google.com/).
+  - **Google Gemini API Key**: Key from [Google AI Studio](https://aistudio.google.com/) (for conversational AI Weather Narrator briefings).
 
 ---
 
@@ -38,13 +40,17 @@ weather-app/
 │   │   │   ├── WeatherCard.jsx    (Local time + Temperature grid)
 │   │   │   ├── ForecastGrid.jsx   (Responsive 5-day columns)
 │   │   │   ├── MapEmbed.jsx       (Google Maps place markers + OSM Fallback)
-│   │   │   ├── YouTubePanel.jsx   (City travel guides iframe panels)
+│   │   │   ├── YouTubePanel.jsx   (City travel guides iframe panels with custom YouTube SVGs)
 │   │   │   ├── ExportPanel.jsx    (JSON/CSV/XML/PDF/MD blob downloads)
 │   │   │   └── ErrorBanner.jsx    (Unified dismissable warning banner)
 │   │   ├── pages/
-│   │   │   ├── Home.jsx           (Dashboard layout control)
-│   │   │   └── History.jsx        (Historic query logs CRUD panel)
-│   │   ├── App.jsx                (Theme controller + routing)
+│   │   │   ├── Home.jsx           (Dashboard layout + Gemini Briefing panel)
+│   │   │   ├── History.jsx        (Historic query logs CRUD panel)
+│   │   │   ├── Login.jsx          (Session authentication logins)
+│   │   │   └── Signup.jsx         (Create new profile page)
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx    (User sessions provider)
+│   │   ├── App.jsx                (Theme controller + routing + PM Accelerator footer)
 │   │   └── index.css              (Glassmorphic styles + variables)
 │   └── package.json
 ├── server/              (Express backend)
@@ -52,18 +58,23 @@ weather-app/
 │   │   ├── weather.js             (Current conditions & forecasts)
 │   │   ├── queries.js             (CRUD Search Log operations)
 │   │   ├── export.js              (Multi-format database downloads)
-│   │   └── youtube.js             (Travel video searches)
+│   │   ├── youtube.js             (Travel video searches)
+│   │   └── authRoutes.js          (Session authentication endpoints)
 │   ├── models/
 │   │   ├── Query.js               (Historical Query MongoDB Model)
+│   │   ├── User.js                (Encrypted User Session Model)
 │   │   └── WeatherCache.js        (MongoDB 1-hour TTL Cache Model)
 │   ├── controllers/
-│   │   ├── weatherController.js
-│   │   ├── queryController.js
-│   │   └── exportController.js
+│   │   ├── weatherController.js   (Includes Google Gemini integration)
+│   │   ├── queryController.js     (Open-Meteo fallback routing engines)
+│   │   ├── exportController.js
+│   │   └── authController.js
 │   ├── middleware/
+│   │   ├── auth.js                (JWT Bearer Shield)
 │   │   └── errorHandler.js        (Unified JSON error response formatter)
 │   └── index.js
 ├── .env                 (Environment variables config - shared)
+├── .gitignore           (Recursive secrets shielding)
 └── package.json         (Root orchestration script)
 ```
 
@@ -86,6 +97,8 @@ MONGODB_URI=your_mongodb_connection_uri
 OPENWEATHER_API_KEY=your_openweathermap_api_key
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
+GEMINI_API_KEY=your_google_gemini_api_key
+JWT_SECRET=your_jwt_secret_super_secure
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
 ```
@@ -119,59 +132,68 @@ npm run dev
 
 All backend routes are structured logically and return uniform, standardized JSON responses:
 
-### 1. Weather Module
+### 1. Weather & AI Narrative Module
 - **`GET /api/weather/current?location=<query>`**
   - **Params**: `location` (can be city name, ZIP code, GPS coordinates, or landmark).
-  - **Action**: Resolves location coordinates via Google Geocoding, queries OpenWeatherMap current metrics, caches the result in MongoDB with a 1-hour expiration index, and returns structured climate stats.
-- **`GET /api/weather/forecast?location=<query>`**
-  - **Params**: `location` or coordinates `lat`/`lon`.
-  - **Action**: Queries 5-day/3-hour forecasts, compiles 3-hourly intervals into standard daily highs/lows and maps weather description codes to day-name objects.
+  - **Action**: Resolves coordinates, fetches OpenWeatherMap current + forecast data, compiles it, and **queries the Google Gemini API (`gemini-1.5-flash`)** using customized system instructions. Caches both the weather stats and the generated AI Narrative inside MongoDB with a 1-hour expiration index, ensuring rate limit safety.
 
 ### 2. Historical CRUD Module (`/api/queries`)
 - **`POST /api/queries`**
   - **Body**: `{ location, dateFrom, dateTo, notes? }`
-  - **Action**: Validates dates (ISO-compliant, start before end, range <= 30 days). Resolves coordinates, fetches historic ranges from free Open-Meteo API, and saves query details + day logs + custom notes to the database.
+  - **Action**: Validates dates (ISO-compliant, range <= 30 days). Resolves coordinates, fetches historical daily ranges from Open-Meteo. **Features an intelligent fallback router**: if historical `/v1/archive` returns a 400 (due to current or future dates), the server automatically redirects the request to Open-Meteo's `/v1/forecast` endpoint to fetch the weather successfully!
 - **`GET /api/queries`**
-  - **Query Params**: `?location=<fuzzy_filter>&limit=20&skip=0`
   - **Action**: Retrieves all saved searches sorted in descending order of creation.
-- **`GET /api/queries/:id`**
-  - **Action**: Returns a single query document.
 - **`PUT /api/queries/:id`**
   - **Body**: `{ location?, dateFrom?, dateTo?, notes? }`
-  - **Action**: Validates inputs. If coordinates or dates are updated, it re-queries Open-Meteo and replaces the saved daily list, returning the modified record.
-- **`DELETE /api/queries/:id`**
-  - **Action**: Removes a search record from the database.
+  - **Action**: Fully updates the query's location, start, end, or notes. If location or dates change, it automatically re-geocodes and re-queries Open-Meteo with the same forecast fallback router!
 
-### 3. Media & Exports
-- **`GET /api/youtube?location=<city>`**
-  - **Action**: Queries YouTube Search API for `<city> travel 4K`, returning the top 3 items. Degrades gracefully to curated visuals if VITE keys are missing.
-- **`GET /api/export?format=json|csv|xml|pdf|markdown`**
-  - **Action**: Queries the entire history collection and returns download binaries:
-    - `csv`: formats logs into tables using `json2csv`.
-    - `xml`: compiles tags with `fast-xml-parser` builder.
-    - `pdf`: renders text coordinates summaries and dividers using `pdfkit`.
-    - `markdown`: returns a standard GFM Markdown table.
+### 3. Session User Authentication (`/api/auth`)
+- **`POST /api/auth/signup`**: Creates an encrypted profile using `bcrypt` pre-save salts.
+- **`POST /api/auth/login`**: Authenticates credentials and returns a signed `jsonwebtoken` session token.
+- **`GET /api/auth/me`**: Protected profile loader verifying valid JWT headers.
 
 ---
 
-## ✅ FEATURE CHECKLIST
+## ✅ SYSTEM FEATURE LIST
 
-- [x] **FEATURE 1: Location Inputs & Live Weather** (Cities, ZIP codes, exact GPS inputs, and landmarks support. Responsive cards with local offset time tracking).
-- [x] **FEATURE 2: 5-Day forecast grids** (Groups OpenWeatherMap 3-hour lists into daily summaries with weekday name markers).
-- [x] **FEATURE 3: MongoDB historical CRUD** (Saves historical weather ranges via Open-Meteo using a 30-day validator constraint).
-- [x] **FEATURE 4: History UI** (Dynamic CRUD log panels offering inline edits, deletes, and creation).
-- [x] **FEATURE 5: Map Embedding** (Google Maps iframe embeds with full OpenStreetMap Nominatim keyless coordinate fallback).
-- [x] **FEATURE 6: YouTube Panel** (Embeds city travel guides with a keyless fallback visual thumbnail engine).
-- [x] **FEATURE 7: Multi-Format Data Exports** (Allows downloading full histories as CSV, XML, PDF reports, Markdown tables, and raw JSON).
-- [x] **FEATURE 8: Error Handling** (Unified Express JSON error responses, client-side input validation, and rate limit checks).
-- [x] **FEATURE 9: Responsive Design** (Adapts layouts dynamically across mobile, tablet, and desktop viewports using Tailwind CSS).
-- [x] **FEATURE 10: Academic / Affiliate Branding** (Credits developer name "YOUR_NAME_HERE" and showcases PM Accelerator's description in the footer).
+- [x] **1. Location Inputs & Live Weather Resolution**
+  - Resolves standard searches by city names, ZIP codes, and landmark names (e.g., "Eiffel Tower").
+  - Employs direct client-side parsing of exact coordinates (e.g. `48.8584,2.2945`) to optimize speed.
+  - Displays localized clock offsets, temperature variations, real-time weather icons, and interactive conditions cards.
+- [x] **2. Interactive Maps & OSM Fallback**
+  - Renders interactive locations in Google Maps iframe panels.
+  - Automatically falls back to an open-source Leaflet map widget using OpenStreetMap tiles recursively if the API key is not configured.
+- [x] **3. AI Weather Narrator (Google Gemini API)**
+  - Sends temperature stats and forecast vectors directly to the **Google Gemini API (`gemini-1.5-flash`)** using structured system instructions.
+  - Writes a customized 3-sentence conversational weather reporter briefing (under 60 words) highlighting feel, activity advice, and upcoming week insights.
+  - Showcases briefings inside an elegant "AI Insight" container with a custom sparkling icon.
+  - Employs graceful local code-based fallbacks if no Gemini key is provided, ensuring zero downtime.
+- [x] **4. MongoDB 1-Hour Cache & Rate-Limit Shield**
+  - Caches current geolocated conditions and Gemini briefings under Mongoose structures.
+  - Configures a MongoDB `expires: 3600` (1-hour TTL) automatic collection wipe to prevent API rate-limit exhaustion and eliminate redundant Gemini API key re-calls.
+- [x] **5. Interactive YouTube Travel Guides**
+  - Dynamically searches and matches the top 3 high-definition travel guides for the queried city using the YouTube Data API v3.
+  - Features high-fidelity iframe displays with custom vector branding overlays.
+- [x] **6. 5-Day Forecast Grid**
+  - Aggregates OpenWeatherMap 3-hour forecasts into daily high/low summaries.
+  - Uses dynamic columns that stack smoothly into singular rows on narrow screen viewports.
+- [x] **7. Historical CRUD Queries**
+  - Creates, reads, updates, and deletes query logs inside MongoDB.
+  - Embeds interactive inline forms to alter dates, notes, and locations easily on the history panel.
+- [x] **8. Open-Meteo Fallback Router**
+  - Automatically checks if date limits exceed Open-Meteo's standard historical `/v1/archive` restrictions.
+  - Dynamically reroutes current or future dates to the `/v1/forecast` API, avoiding standard `400 Bad Request` exceptions seamlessly.
+- [x] **9. Secure User Authentication & Session Sync**
+  - Registers profiles securely using salted `bcrypt` storage and logs users in with JWT tokens.
+  - Restricts dashboard history panels and tracks user queries dynamically.
+- [x] **10. Multi-Format Data Exporter**
+  - Downloads saved query records directly from the React dashboard.
+  - Compiles lists into CSV tables, XML schemas, Markdown sheets, raw JSON files, or professional PDF reports (crafted using `pdfkit`).
 
 ---
 
-## 🎨 DESIGN SYSTEMS
+## 🎓 PM ACCELERATOR AFFILIATE BRANDING & CREDITS
 
-WeatherIQ AI employs a premium, futuristic dark-glass layout incorporating HSL styling:
-- **Glassmorphic panels**: High-blur backdrops with subtle border overlays to deliver high contrast.
-- **Sleek micro-animations**: Custom transition scaling (`hover-scale`) and clock pulses for responsive buttons.
-- **Contrast Ratios**: Verified dark and light gradients, accessible text sizes, and descriptive loaders for a gorgeous experience.
+- **Developer Credits**: Prominently displays developer credits for **Miriyala Sahasra** across browser tab titles, header page titles, and styled footer panels.
+- **Affiliate Branding**: Showcases the detailed two-paragraph Product Manager Accelerator Program Overview in a dark/light mode glassmorphic footer panel, including active hyperlinked redirects to their official LinkedIn school page: `https://www.linkedin.com/school/pmaccelerator/`.
+
