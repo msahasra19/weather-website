@@ -4,9 +4,8 @@ import axios from 'axios';
 const AuthContext = createContext(null);
 
 // Configure axios base defaults using environment variables if set (triggering fresh build with updated Vercel environment variables)
-const rawApiUrl = import.meta.env.VITE_API_URL;
-const isProdLocalhost = rawApiUrl && rawApiUrl.includes('localhost') && !import.meta.env.DEV;
-axios.defaults.baseURL = isProdLocalhost ? '' : (rawApiUrl || (import.meta.env.DEV ? 'http://localhost:5000' : ''));
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:5000' : '');
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

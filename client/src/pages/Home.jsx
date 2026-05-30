@@ -8,9 +8,8 @@ import YouTubePanel from '../components/YouTubePanel';
 import ErrorBanner from '../components/ErrorBanner';
 import { Loader2, CloudAlert, RefreshCw, Sparkles } from 'lucide-react';
 
-const rawApiUrl = import.meta.env.VITE_API_URL;
-const isProdLocalhost = rawApiUrl && rawApiUrl.includes('localhost') && !import.meta.env.DEV;
-const serverUrl = isProdLocalhost ? '' : (rawApiUrl || (import.meta.env.DEV ? 'http://localhost:5000' : ''));
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const serverUrl = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:5000' : '');
 
 const fetcher = async (url) => {
   const res = await axios.get(url);

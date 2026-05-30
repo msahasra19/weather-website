@@ -8,9 +8,8 @@ export default function ExportPanel({ onExportError }) {
   const triggerExport = async (format) => {
     setLoadingFormat(format);
     try {
-      const rawApiUrl = import.meta.env.VITE_API_URL;
-      const isProdLocalhost = rawApiUrl && rawApiUrl.includes('localhost') && !import.meta.env.DEV;
-      const serverUrl = isProdLocalhost ? '' : (rawApiUrl || (import.meta.env.DEV ? 'http://localhost:5000' : ''));
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const serverUrl = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:5000' : '');
       const response = await axios({
         url: `${serverUrl}/api/export?format=${format}`,
         method: 'GET',

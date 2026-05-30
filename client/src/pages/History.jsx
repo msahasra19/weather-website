@@ -4,9 +4,8 @@ import ExportPanel from '../components/ExportPanel';
 import ErrorBanner from '../components/ErrorBanner';
 import { Calendar, Plus, Edit2, Trash2, MapPin, Loader2, Sparkles, X, Check } from 'lucide-react';
 
-const rawApiUrl = import.meta.env.VITE_API_URL;
-const isProdLocalhost = rawApiUrl && rawApiUrl.includes('localhost') && !import.meta.env.DEV;
-const serverUrl = isProdLocalhost ? '' : (rawApiUrl || (import.meta.env.DEV ? 'http://localhost:5000' : ''));
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const serverUrl = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:5000' : '');
 
 export default function History() {
   const [queries, setQueries] = useState([]);
