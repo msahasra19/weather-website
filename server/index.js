@@ -1,5 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
+
+// Disable buffering globally before models are compiled
+mongoose.set('bufferCommands', false);
+
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
@@ -31,10 +35,11 @@ if (!cached) {
 }
 
 async function connectDB() {
-  if (cached.conn) return cached.conn;
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
+  }
 
-  if (!cached.promise) {
-    mongoose.set('bufferCommands', false);
+  if (!cached.promise || mongoose.connection.readyState === 0) {
     cached.promise = mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
