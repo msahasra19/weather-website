@@ -22,6 +22,52 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/weatherapp';
+
+// Database connection caching for serverless
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    mongoose.set('bufferCommands', false);
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    }).then(mongooseInstance => {
+      console.log('Successfully connected to MongoDB.');
+      return mongooseInstance;
+    }).catch(err => {
+      console.error('CRITICAL: MongoDB connection failed!', err.message);
+      cached.promise = null;
+      throw err;
+    });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+// Global DB Connection Middleware
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    if (req.path.startsWith('/api/auth') || req.path.startsWith('/api/queries') || req.path.startsWith('/api/export')) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Database connection failed. Please check your MongoDB configuration and IP whitelist.' 
+      });
+    }
+    next();
+  }
+});
+
 // Route Mounts
 app.use('/api/weather', weatherRoutes);
 app.use('/api/queries', queriesRoutes);
@@ -42,29 +88,19 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/weatherapp';
 
-// Graceful Database Connection Bootstrapper (Asynchronous)
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  // ensure we don't buffer indefinitely if the connection drops
-  socketTimeoutMS: 45000, 
-})
-  .then(() => {
-    console.log('Successfully connected to MongoDB.');
-    // ONLY listen if running locally (not in serverless production on Vercel)
-    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-      app.listen(PORT, () => {
-        console.log(`Server is running in development mode on port ${PORT}`);
-      });
-    }
-  })
-  .catch((err) => {
-    console.error('CRITICAL: MongoDB connection failed!', err.message);
-    console.warn('Could not connect to the database. Exiting...');
-    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-      process.exit(1);
-    }
+// ONLY listen if running locally (not in serverless production on Vercel)
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running in development mode on port ${PORT}`);
+    });
+  }).catch(() => {
+    console.warn('Starting server without DB connection (will retry on requests)...');
+    app.listen(PORT, () => {
+      console.log(`Server is running in development mode on port ${PORT}`);
+    });
   });
+}
 
 module.exports = app;
