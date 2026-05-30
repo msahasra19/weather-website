@@ -1,4 +1,5 @@
 const axios = require('axios');
+const mongoose = require('mongoose');
 const WeatherCache = require('../models/WeatherCache');
 
 // Helper to resolve coordinates either from GPS pattern or via Geocoding APIs
@@ -159,12 +160,19 @@ exports.getCurrentWeather = async (req, res, next) => {
     const cacheKey = `${resolved.lat.toFixed(3)}_${resolved.lon.toFixed(3)}`;
 
     // B. Check in MongoDB TTL Cache (within last hour)
-    const existingCache = await WeatherCache.findOne({
-      $or: [
-        { location: location ? location.toLowerCase() : cacheKey },
-        { lat: { $gte: resolved.lat - 0.01, $lte: resolved.lat + 0.01 }, lon: { $gte: resolved.lon - 0.01, $lte: resolved.lon + 0.01 } }
-      ]
-    });
+    let existingCache = null;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        existingCache = await WeatherCache.findOne({
+          $or: [
+            { location: location ? location.toLowerCase() : cacheKey },
+            { lat: { $gte: resolved.lat - 0.01, $lte: resolved.lat + 0.01 }, lon: { $gte: resolved.lon - 0.01, $lte: resolved.lon + 0.01 } }
+          ]
+        });
+      } catch (dbErr) {
+        console.warn('MongoDB cache read failed, bypassing cache...', dbErr.message);
+      }
+    }
 
     if (existingCache) {
       console.log('Serving current weather from MongoDB cache...');
@@ -274,21 +282,33 @@ exports.getCurrentWeather = async (req, res, next) => {
     };
 
     // F. Save to MongoDB TTL Cache (1-hour expiration is handled by MongoDB schema index)
-    await WeatherCache.create({
-      location: location ? location.toLowerCase() : cacheKey,
-      lat: resolved.lat,
-      lon: resolved.lon,
-      data: structuredResult
-    });
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await WeatherCache.create({
+          location: location ? location.toLowerCase() : cacheKey,
+          lat: resolved.lat,
+          lon: resolved.lon,
+          data: structuredResult
+        });
+      } catch (dbErr) {
+        console.warn('MongoDB cache write failed:', dbErr.message);
+      }
+    }
 
     return res.json(structuredResult);
   } catch (err) {
     if (err.response && err.response.status === 429) {
       // Graceful degradation on OWM rate limit
       console.warn('OpenWeatherMap API Rate limited (429). Attempting to fetch last cache...');
-      const fallbackCache = await WeatherCache.findOne().sort({ fetchedAt: -1 });
-      if (fallbackCache) {
-        return res.json(fallbackCache.data);
+      if (mongoose.connection.readyState === 1) {
+        try {
+          const fallbackCache = await WeatherCache.findOne().sort({ fetchedAt: -1 });
+          if (fallbackCache) {
+            return res.json(fallbackCache.data);
+          }
+        } catch (dbErr) {
+          console.error('Fallback cache read failed:', dbErr.message);
+        }
       }
     }
     next(err);
