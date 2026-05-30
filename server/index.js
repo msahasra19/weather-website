@@ -46,8 +46,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/weathe
 
 // Graceful Database Connection Bootstrapper (Asynchronous)
 mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  bufferCommands: false,
+  serverSelectionTimeoutMS: 5000
 })
   .then(() => {
     console.log('Successfully connected to MongoDB.');
