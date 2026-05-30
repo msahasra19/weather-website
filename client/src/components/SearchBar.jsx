@@ -26,7 +26,7 @@ export default function SearchBar({ onSearch, onUseLocation, isLoading }) {
         console.error('Error fetching GPS geolocation:', error);
         alert(`Could not retrieve location: ${error.message}. Please input a city manually.`);
       },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
