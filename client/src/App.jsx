@@ -213,44 +213,23 @@ function AppContent() {
           </Routes>
         </main>
 
-        {/* Footer Credit & PM Accelerator Branding */}
+        {/* Footer */}
         <footer className="glass-panel mx-4 mb-4 mt-auto p-6 md:p-8 border border-slate-200 dark:border-slate-800/80 rounded-3xl">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-8">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-4">
             
-            {/* Developer Credit & Program Description */}
-            <div className="max-w-2xl">
+            {/* Developer Credit */}
+            <div>
               <h4 className="text-sm font-extrabold tracking-widest text-teal-400 uppercase">
                 Developer Credit
               </h4>
               <p className="text-lg font-black text-slate-800 dark:text-slate-100 mt-1">
                 Miriyala Sahasra
               </p>
-              
-              <div className="mt-4 pt-4 border-t border-slate-300 dark:border-slate-800/60">
-                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                  Academic / Assessment Affiliate
-                </h5>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1.5">
-                  The Product Manager Accelerator Program is designed to support PM professionals through every stage of their careers. From students looking for entry-level jobs to Directors looking to take on a leadership role, our program has helped over hundreds of students fulfill their career aspirations.
-                </p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-2.5">
-                  Our Product Manager Accelerator community are ambitious and committed. Through our program they have learnt, honed and developed new PM and leadership skills, giving them a strong foundation for their future endeavors.
-                </p>
-              </div>
             </div>
 
-            {/* Hyperlinks */}
-            <div className="shrink-0 flex flex-col gap-3">
-              <a
-                href="https://www.linkedin.com/school/pmaccelerator/"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center space-x-1 text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-blue-500/10 hover-scale transition cursor-pointer"
-              >
-                <span>PM Accelerator LinkedIn</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
-              <span className="text-[10px] text-slate-500 font-medium text-left lg:text-right">
+            {/* Copyright */}
+            <div className="shrink-0">
+              <span className="text-[10px] text-slate-500 font-medium">
                 Full-Stack WeatherIQ © 2026
               </span>
             </div>
